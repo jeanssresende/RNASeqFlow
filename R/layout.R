@@ -2,7 +2,7 @@ create_layout <- function(header,
                           sidebar,
                           workspace) {
   
-  page_fluid(
+  page_fillable(
     
     theme = bs_theme(
       version = 5,
@@ -10,24 +10,24 @@ create_layout <- function(header,
     ),
     
     tags$head(
-      
       tags$link(
         rel = "stylesheet",
         href = "css/style.css"
       )
-      
     ),
     
-    header,
-    
     div(
+      class = "app",
       
-      class = "app-body",
+      header,
       
-      sidebar,
-      
-      workspace
-      
+      div(
+        class = "app-body",
+        
+        sidebar,
+        
+        workspace
+      )
     )
     
   )
