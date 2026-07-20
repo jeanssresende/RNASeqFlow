@@ -17,12 +17,17 @@ import_samples_page_ui <- function() {
       
     ),
     
-    action_card(
-      id = "select_folder",
-      title = "Select Folder",
-      description = "Choose a directory containing FASTQ files.",
-      icon_name = "folder-open"
+    div(
+      class = "mb-4",
+      
+      actionButton(
+        inputId = "select_folder",
+        label = "📂 Select Folder",
+        class = "btn btn-primary"
+      )
     ),
+    
+    verbatimTextOutput("selected_folder"),
     
     br(),
     

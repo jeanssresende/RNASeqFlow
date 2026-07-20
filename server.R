@@ -6,6 +6,7 @@ server <- function(input, output, session) {
   
   current_page <- reactiveVal("home")
   current_project <- reactiveVal(NULL)
+  selected_folder <- reactiveVal(NULL)
   
   
   # ==========================
@@ -22,6 +23,26 @@ server <- function(input, output, session) {
     
   })
   
+  
+  observeEvent(input$select_folder, {
+    
+    folder <- svDialogs::dlg_dir(
+      default = normalizePath("~")
+    )$res
+    
+    if (nzchar(folder)) {
+      selected_folder(folder)
+    }
+    
+  })
+  
+  output$selected_folder <- renderText({
+    
+    req(selected_folder())
+    
+    selected_folder()
+    
+  })
   
   # ==========================
   # Navigation
@@ -63,7 +84,24 @@ server <- function(input, output, session) {
     current_page("logs")
   })
   
+  observeEvent(input$select_folder, {
+    
+    folder <- parseDirPath(volumes, input$select_folder)
+    
+    if (length(folder) > 0) {
+      selected_folder(folder)
+    }
+    
+  })
   
+  
+  output$selected_folder <- renderText({
+    
+    req(selected_folder())
+    
+    selected_folder()
+    
+  })
   # ==========================
   # Workspace
   # ==========================

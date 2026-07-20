@@ -1,6 +1,7 @@
 library(shiny)
 library(bslib)
 library(shinyWidgets)
+library(svDialogs)
 
 # Components
 source("R/components/action_card.R")
