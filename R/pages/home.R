@@ -2,22 +2,49 @@ home_page_ui <- function() {
   
   tagList(
     
-    h2("Bem-vindo ao RNASeqFlow"),
-    
-    p("Pipeline completo para análise de RNA-Seq."),
-    
-    br(),
-    
-    actionButton(
-      "new_project",
-      "Criar Projeto",
-      class = "btn-primary"
+    div(
+      class = "page-header",
+      
+      h2(
+        class = "page-title",
+        "Welcome to RNASeqFlow"
+      ),
+      
+      p(
+        class = "page-description",
+        "A graphical workflow for RNA-Seq preprocessing, quantification and downstream analysis."
+      )
+      
     ),
     
-    actionButton(
-      "open_project",
-      "Abrir Projeto",
-      class = "btn-outline-secondary"
+    fluidRow(
+      
+      column(
+        width = 6,
+        class = "mb-4",
+        
+        action_card(
+          id = "new_project",
+          title = "Create Project",
+          description = "Create a new RNA-Seq project.",
+          icon_name = "folder-plus"
+        )
+        
+      ),
+      
+      column(
+        width = 6,
+        class = "mb-4",
+        
+        action_card(
+          id = "open_project",
+          title = "Open Project",
+          description = "Open an existing project.",
+          icon_name = "folder-open"
+        )
+        
+      )
+      
     )
     
   )

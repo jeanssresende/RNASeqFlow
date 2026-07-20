@@ -12,7 +12,10 @@ header_ui <- function() {
     div(
       class = "project-name",
       
-      "Projeto: Nenhum projeto"
+      textOutput(
+        outputId = "current_project",
+        inline = TRUE
+      )
     ),
     
     div(
