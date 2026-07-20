@@ -1,13 +1,36 @@
-ui <- fluidPage(
+library(bslib)
+
+ui <- page_fluid(
   
   theme = bs_theme(
     version = 5,
     bootswatch = "flatly"
   ),
   
-  titlePanel("RNASeqFlow"),
+  tags$head(
+    
+    tags$link(
+      rel = "stylesheet",
+      type = "text/css",
+      href = "css/style.css"
+    )
+    
+  ),
   
-  h2("Bem-vindo ao RNASeqFlow"),
+  div(
+    
+    class = "container-fluid",
+    
+    h1("🧬 RNASeqFlow"),
+    
+    hr(),
+    
+    h3("Bem-vindo"),
+    
+    p(
+      "Interface em desenvolvimento."
+    )
+    
+  )
   
-  p("Primeira versão do software.")
 )
