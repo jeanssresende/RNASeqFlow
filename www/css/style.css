@@ -97,3 +97,38 @@ body{
     overflow:auto;
 
 }
+
+.menu-item {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.menu-item:hover{
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+}
+
+.menu-item:focus,
+.menu-item:active,
+.menu-item:visited {
+  text-decoration: none;
+  color: inherit;
+}
+
+.menu-item:visited,
+.menu-item:focus,
+.menu-item:active{
+
+    color: inherit;
+
+    text-decoration: none;
+
+}

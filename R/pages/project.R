@@ -1,10 +1,10 @@
-project_page <- function() {
+project_page_ui <- function() {
   
   tagList(
     
     h2("Projeto"),
     
-    p("Gerenciamento de projetos.")
+    p("Página de gerenciamento de projetos.")
     
   )
   
