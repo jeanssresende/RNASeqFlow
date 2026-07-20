@@ -8,6 +8,19 @@ server <- function(input, output, session) {
   current_project <- reactiveVal(NULL)
   selected_folder <- reactiveVal(NULL)
   
+  fastq_files <- reactive({
+    
+    req(selected_folder())
+    
+    list.files(
+      path = selected_folder(),
+      pattern = "\\.(fastq|fq)(\\.gz)?$",
+      ignore.case = TRUE,
+      full.names = FALSE
+    )
+    
+  })
+  
   
   # ==========================
   # Header
@@ -24,17 +37,22 @@ server <- function(input, output, session) {
   })
   
   
+  # ==========================
+  # Folder Selection
+  # ==========================
+  
   observeEvent(input$select_folder, {
     
     folder <- svDialogs::dlg_dir(
       default = normalizePath("~")
     )$res
     
-    if (nzchar(folder)) {
+    if (!is.null(folder) && nzchar(folder)) {
       selected_folder(folder)
     }
     
   })
+  
   
   output$selected_folder <- renderText({
     
@@ -43,6 +61,28 @@ server <- function(input, output, session) {
     selected_folder()
     
   })
+  
+  
+  output$fastq_table <- renderTable({
+    
+    req(selected_folder())
+    
+    files <- fastq_files()
+    
+    if (length(files) == 0) {
+      
+      return(
+        data.frame(
+          Message = "No FASTQ files found."
+        )
+      )
+      
+    }
+    
+    parse_fastq_files(files)
+    
+  })
+  
   
   # ==========================
   # Navigation
@@ -84,24 +124,7 @@ server <- function(input, output, session) {
     current_page("logs")
   })
   
-  observeEvent(input$select_folder, {
-    
-    folder <- parseDirPath(volumes, input$select_folder)
-    
-    if (length(folder) > 0) {
-      selected_folder(folder)
-    }
-    
-  })
   
-  
-  output$selected_folder <- renderText({
-    
-    req(selected_folder())
-    
-    selected_folder()
-    
-  })
   # ==========================
   # Workspace
   # ==========================
@@ -112,15 +135,15 @@ server <- function(input, output, session) {
       
       current_page(),
       
-      home            = home_page_ui(),
-      project         = project_page_ui(),
-      import          = import_samples_page_ui(),
-      qc              = quality_control_page_ui(),
-      trimming        = trimming_page_ui(),
-      quantification  = quantification_page_ui(),
-      annotation      = annotation_page_ui(),
-      export          = export_page_ui(),
-      logs            = logs_page_ui()
+      home           = home_page_ui(),
+      project        = project_page_ui(),
+      import         = import_samples_page_ui(),
+      qc             = quality_control_page_ui(),
+      trimming       = trimming_page_ui(),
+      quantification = quantification_page_ui(),
+      annotation     = annotation_page_ui(),
+      export         = export_page_ui(),
+      logs           = logs_page_ui()
       
     )
     

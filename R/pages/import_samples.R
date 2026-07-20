@@ -33,11 +33,7 @@ import_samples_page_ui <- function() {
     
     h4("FASTQ Files"),
     
-    empty_state(
-      icon_name = "folder-open",
-      title = "No folder selected",
-      description = "Select a folder to display FASTQ files."
-    ),
+    tableOutput("fastq_table"),
     
     br(),
     
