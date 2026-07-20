@@ -7,6 +7,7 @@ server <- function(input, output, session) {
   current_page <- reactiveVal("home")
   current_project <- reactiveVal(NULL)
   selected_folder <- reactiveVal(NULL)
+  project_samples <- reactiveVal(NULL)
   
   fastq_files <- reactive({
     
@@ -49,6 +50,16 @@ server <- function(input, output, session) {
     
     if (!is.null(folder) && nzchar(folder)) {
       selected_folder(folder)
+      files <- list.files(
+        folder,
+        pattern = "\\.(fastq|fq)(\\.gz)?$",
+        ignore.case = TRUE,
+        full.names = FALSE
+      )
+      
+      project_samples(
+        parse_fastq_files(files)
+      )
     }
     
   })
@@ -65,21 +76,9 @@ server <- function(input, output, session) {
   
   output$fastq_table <- renderTable({
     
-    req(selected_folder())
+    req(project_samples())
     
-    files <- fastq_files()
-    
-    if (length(files) == 0) {
-      
-      return(
-        data.frame(
-          Message = "No FASTQ files found."
-        )
-      )
-      
-    }
-    
-    parse_fastq_files(files)
+    project_samples()
     
   })
   
