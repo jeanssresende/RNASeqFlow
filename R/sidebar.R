@@ -20,7 +20,7 @@ sidebar_ui <- function() {
     
     menu_item("go_project", "folder-open", "Projects"),
     
-    menu_item("go_import", "folder-tree", "Import Samples"),
+    menu_item("go_import", "file-import", "Import Samples"),
     
     menu_item("go_qc", "clipboard-check", "Quality Control"),
     
