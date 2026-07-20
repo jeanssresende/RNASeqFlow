@@ -132,3 +132,98 @@ body{
     text-decoration: none;
 
 }
+
+.action-card-link {
+
+    text-decoration: none;
+    color: inherit;
+    display: block;
+
+}
+
+.action-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:30px;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    background:white;
+
+    cursor:pointer;
+
+    transition:all .2s ease;
+
+    min-height:140px;
+
+}
+
+.action-card:hover{
+
+    transform:translateY(-3px);
+
+    border-color:var(--primary);
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.action-card-icon{
+
+    width:56px;
+
+    text-align:center;
+
+    font-size:42px;
+
+    color:var(--primary);
+
+}
+
+.action-card-title{
+
+    margin:0;
+
+    font-size:1.3rem;
+
+    font-weight:600;
+
+}
+
+.action-card-description{
+
+    margin-top:8px;
+
+    color:#666;
+
+}
+
+
+.page-header{
+
+    margin-bottom:32px;
+
+}
+
+.page-title{
+
+    margin-bottom:6px;
+
+    font-weight:600;
+
+}
+
+.page-description{
+
+    color:#666;
+
+    margin-bottom:0;
+
+}
