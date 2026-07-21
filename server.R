@@ -1,13 +1,18 @@
 server <- function(input, output, session) {
   
-  # ==========================
+  # ==========================================================
   # Application State
-  # ==========================
+  # ==========================================================
   
   current_page <- reactiveVal("home")
   current_project <- reactiveVal(NULL)
   selected_folder <- reactiveVal(NULL)
   project_samples <- reactiveVal(NULL)
+  
+  
+  # ==========================================================
+  # Reactives
+  # ==========================================================
   
   fastq_files <- reactive({
     
@@ -23,9 +28,18 @@ server <- function(input, output, session) {
   })
   
   
-  # ==========================
+  project_info <- reactive({
+    
+    req(project_samples())
+    
+    project_summary(project_samples())
+    
+  })
+  
+  
+  # ==========================================================
   # Header
-  # ==========================
+  # ==========================================================
   
   output$current_project <- renderText({
     
@@ -38,9 +52,9 @@ server <- function(input, output, session) {
   })
   
   
-  # ==========================
+  # ==========================================================
   # Folder Selection
-  # ==========================
+  # ==========================================================
   
   observeEvent(input$select_folder, {
     
@@ -49,9 +63,11 @@ server <- function(input, output, session) {
     )$res
     
     if (!is.null(folder) && nzchar(folder)) {
+      
       selected_folder(folder)
+      
       files <- list.files(
-        folder,
+        path = folder,
         pattern = "\\.(fastq|fq)(\\.gz)?$",
         ignore.case = TRUE,
         full.names = FALSE
@@ -60,10 +76,15 @@ server <- function(input, output, session) {
       project_samples(
         parse_fastq_files(files)
       )
+      
     }
     
   })
   
+  
+  # ==========================================================
+  # Outputs
+  # ==========================================================
   
   output$selected_folder <- renderText({
     
@@ -74,18 +95,107 @@ server <- function(input, output, session) {
   })
   
   
-  output$fastq_table <- renderTable({
+  output$project_summary <- renderUI({
     
-    req(project_samples())
+    req(project_info())
     
-    project_samples()
+    info <- project_info()
+    
+    tagList(
+      
+      h4("Project Summary"),
+      
+      tags$table(
+        class = "table table-sm",
+        
+        tags$tr(
+          tags$td(strong("Samples")),
+          tags$td(info$samples)
+        ),
+        
+        tags$tr(
+          tags$td(strong("FASTQ Files")),
+          tags$td(info$fastq)
+        ),
+        
+        tags$tr(
+          tags$td(strong("Paired-end")),
+          tags$td(info$paired)
+        ),
+        
+        tags$tr(
+          tags$td(strong("Single-end")),
+          tags$td(info$single)
+        ),
+        
+        tags$tr(
+          tags$td(strong("Valid Samples")),
+          tags$td(info$valid)
+        ),
+        
+        tags$tr(
+          tags$td(strong("Missing Files")),
+          tags$td(info$missing)
+        )
+        
+      ),
+      
+      if (info$ready) {
+        
+        div(
+          class = "alert alert-success",
+          "✔ Ready for FastQC"
+        )
+        
+      } else {
+        
+        div(
+          class = "alert alert-danger",
+          "✖ Project contains invalid samples."
+        )
+        
+      }
+      
+    )
     
   })
   
   
-  # ==========================
+  output$fastq_table <- DT::renderDT({
+    
+    req(project_samples())
+    
+    DT::datatable(
+      project_samples(),
+      rownames = FALSE,
+      filter = "top",
+      selection = "single",
+      options = list(
+        pageLength = 10,
+        autoWidth = TRUE,
+        scrollX = TRUE,
+        order = list(list(0, "asc"))
+      )
+    ) |>
+      DT::formatStyle(
+        "Status",
+        fontWeight = "bold",
+        backgroundColor = DT::styleEqual(
+          c("Valid", "Missing R1", "Missing R2"),
+          c("#d4edda", "#f8d7da", "#f8d7da")
+        ),
+        color = DT::styleEqual(
+          c("Valid", "Missing R1", "Missing R2"),
+          c("#155724", "#721c24", "#721c24")
+        )
+      )
+    
+  })
+  
+  
+  # ==========================================================
   # Navigation
-  # ==========================
+  # ==========================================================
   
   observeEvent(input$go_home, {
     current_page("home")
@@ -124,9 +234,9 @@ server <- function(input, output, session) {
   })
   
   
-  # ==========================
+  # ==========================================================
   # Workspace
-  # ==========================
+  # ==========================================================
   
   output$workspace <- renderUI({
     

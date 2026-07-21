@@ -33,7 +33,7 @@ import_samples_page_ui <- function() {
     
     h4("FASTQ Files"),
     
-    tableOutput("fastq_table"),
+    DT::DTOutput("fastq_table"),
     
     br(),
     
@@ -43,7 +43,9 @@ import_samples_page_ui <- function() {
       icon_name = "flask",
       title = "No samples imported",
       description = "Imported samples will appear here."
-    )
+    ),
+    
+    uiOutput("project_summary")
     
   )
   

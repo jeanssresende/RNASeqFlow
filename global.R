@@ -2,6 +2,7 @@ library(shiny)
 library(bslib)
 library(shinyWidgets)
 library(svDialogs)
+library(DT)
 
 # Components
 source("R/components/action_card.R")
@@ -24,3 +25,4 @@ source("R/pages/export.R")
 source("R/pages/logs.R")
 source("R/pages/import_samples.R")
 source("R/fastq_parser.R")
+source("R/project_summary.R")
