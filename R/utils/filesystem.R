@@ -79,3 +79,17 @@ cache_directory <- function() {
   )
   
 }
+
+#-----------------------------------------------------------
+# Conda Environment File
+#-----------------------------------------------------------
+
+environment_file <- function() {
+  
+  file.path(
+    normalizePath(".", winslash = "/", mustWork = TRUE),
+    "install",
+    "environment.yml"
+  )
+  
+}

@@ -6,6 +6,10 @@
 # Execute External Command
 # ==========================================================
 
+# ==========================================================
+# Execute External Command
+# ==========================================================
+
 run_command <- function(command,
                         args = character(),
                         working_directory = NULL,
@@ -13,21 +17,26 @@ run_command <- function(command,
                         stderr = TRUE,
                         wait = TRUE) {
   
-  status <- 0
+  old_wd <- getwd()
   
-  output <- tryCatch({
+  on.exit(
+    setwd(old_wd),
+    add = TRUE
+  )
+  
+  if (!is.null(working_directory)) {
     
-    # Guarda o diretório atual
-    old_wd <- getwd()
+    dir.create(
+      working_directory,
+      recursive = TRUE,
+      showWarnings = FALSE
+    )
     
-    # Muda temporariamente o diretório
-    if (!is.null(working_directory)) {
-      
-      setwd(working_directory)
-      
-      on.exit(setwd(old_wd), add = TRUE)
-      
-    }
+    setwd(working_directory)
+    
+  }
+  
+  output <- tryCatch(
     
     system2(
       command = command,
@@ -35,17 +44,26 @@ run_command <- function(command,
       stdout = stdout,
       stderr = stderr,
       wait = wait
-    )
+    ),
     
-  },
+    error = function(e) {
+      
+      structure(
+        conditionMessage(e),
+        status = 1
+      )
+      
+    }
+    
+  )
   
-  error = function(e) {
+  status <- attr(output, "status")
+  
+  if (is.null(status)) {
     
-    status <<- 1
+    status <- 0
     
-    conditionMessage(e)
-    
-  })
+  }
   
   list(
     
@@ -53,7 +71,11 @@ run_command <- function(command,
     
     status = status,
     
-    output = output
+    output = output,
+    
+    command = command,
+    
+    args = args
     
   )
   

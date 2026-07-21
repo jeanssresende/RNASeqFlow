@@ -322,3 +322,159 @@ conda_version <- function() {
   trimws(result$output)
   
 }
+
+# ==========================================================
+# Check Conda Environment
+# ==========================================================
+
+environment_exists <- function() {
+  
+  dir.exists(
+    conda_environment_directory()
+  )
+  
+}
+
+# ==========================================================
+# Create RNASeqFlow Conda Environment
+# ==========================================================
+
+create_environment <- function(progress = NULL) {
+  
+  if (environment_exists()) {
+    
+    report_progress(
+      progress,
+      value = 1,
+      message = "RNASeqFlow environment already exists."
+    )
+    
+    return(TRUE)
+    
+  }
+  
+  report_progress(
+    progress,
+    value = 0.2,
+    message = "Creating RNASeqFlow environment..."
+  )
+  
+  run_command_or_stop(
+    
+    command = conda_binary(),
+    
+    args = c(
+      
+      "env",
+      
+      "create",
+      
+      "--prefix",
+      
+      conda_environment_directory(),
+      
+      "--file",
+      
+      environment_file()
+      
+    )
+    
+  )
+  
+  if (!environment_exists()) {
+    
+    stop(
+      "Failed to create the RNASeqFlow environment."
+    )
+    
+  }
+  
+  report_progress(
+    progress,
+    value = 1,
+    message = "RNASeqFlow environment created successfully."
+  )
+  
+  TRUE
+  
+}
+
+# ==========================================================
+# Configure Conda
+# ==========================================================
+
+configure_conda <- function(progress = NULL) {
+  
+  report_progress(
+    progress,
+    value = 0.1,
+    message = "Configuring Conda..."
+  )
+  
+  run_command_or_stop(
+    
+    command = conda_binary(),
+    
+    args = c(
+      
+      "tos",
+      
+      "accept",
+      
+      "--override-channels",
+      
+      "--channel",
+      
+      "https://repo.anaconda.com/pkgs/main"
+      
+    )
+    
+  )
+  
+  run_command_or_stop(
+    
+    command = conda_binary(),
+    
+    args = c(
+      
+      "tos",
+      
+      "accept",
+      
+      "--override-channels",
+      
+      "--channel",
+      
+      "https://repo.anaconda.com/pkgs/r"
+      
+    )
+    
+  )
+  
+  run_command_or_stop(
+    
+    command = conda_binary(),
+    
+    args = c(
+      
+      "config",
+      
+      "--set",
+      
+      "channel_priority",
+      
+      "strict"
+      
+    )
+    
+  )
+  
+  report_progress(
+    progress,
+    value = 1,
+    message = "Conda configured successfully."
+  )
+  
+  TRUE
+  
+}
