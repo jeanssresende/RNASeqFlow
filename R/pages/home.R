@@ -24,7 +24,7 @@ home_page_ui <- function() {
         class = "mb-4",
         
         action_card(
-          id = "new_project",
+          id = "create_project",
           title = "Create Project",
           description = "Create a new RNA-Seq project.",
           icon_name = "folder-plus"
