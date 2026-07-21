@@ -132,6 +132,42 @@ server <- function(input, output, session) {
       
     }
     
+    if (!nzchar(project_name)) {
+      
+      showNotification(
+        "Please enter a project name.",
+        type = "warning"
+      )
+      
+      return()
+      
+    }
+    
+    # Não permitir espaços
+    if (grepl("\\s", project_name)) {
+      
+      showNotification(
+        "Project name cannot contain spaces. Use '_' or '-' instead.",
+        type = "error",
+        duration = 8
+      )
+      
+      return()
+      
+    }
+    
+    if (grepl("[^A-Za-z0-9_-]", project_name)) {
+      
+      showNotification(
+        "Project name can only contain letters, numbers, '_' and '-'.",
+        type = "error",
+        duration = 8
+      )
+      
+      return()
+      
+    }
+    
     parent_directory <- svDialogs::dlg_dir(
       default = normalizePath("~"),
       title = "Select project folder"
@@ -221,8 +257,11 @@ server <- function(input, output, session) {
       default = normalizePath("~")
     )$res
     
-    if (is.null(folder) || !nzchar(folder))
+    if (length(folder) == 0 ||
+        is.na(folder) ||
+        !nzchar(folder)) {
       return()
+    }
     
     selected_folder(folder)
     
@@ -232,6 +271,17 @@ server <- function(input, output, session) {
       ignore.case = TRUE,
       full.names = TRUE
     )
+    
+    if (length(files) == 0) {
+      
+      showNotification(
+        "No FASTQ files were found in the selected folder.",
+        type = "warning"
+      )
+      
+      return()
+      
+    }
     
     samples <- parse_fastq_files(files)
     
@@ -391,92 +441,14 @@ server <- function(input, output, session) {
     
   })
   
-  
-  # ==========================================================
-  # FastQC
-  # ==========================================================
-  
-  observeEvent(input$run_fastqc, {
-    
-    req(current_project()$path)
-    
-    if (is.null(current_project()$path)) {
-      
-      showNotification(
-        "Please create or open a project before running FastQC.",
-        type = "error"
-      )
-      
-      return()
-      
-    }
-    
-    req(current_project())
-    req(project_samples())
-    
-    if (is.null(app_settings$tools$fastqc)) {
-      
-      showNotification(
-        "FastQC was not found on this computer.",
-        type = "error"
-      )
-      
-      return()
-      
-    }
-    
-    print(current_project())
-    
-    print(current_project()$path)
-    
-    print(project_samples())
-    
-    output_dir <- file.path(
-      current_project()$path,
-      "results",
-      "fastqc"
-    )
-    
-    print(output_dir)
-    
-    samples <- project_samples()
-    
-    ## Ajuste os nomes das colunas conforme sua tabela
-    files <- unique(c(samples$R1, samples$R2))
-    
-    files <- files[!is.na(files)]
-    
-    withProgress(
-      
-      message = "Running FastQC...",
-      value = 0,
-      
-      {
-        
-        run_fastqc(
-          
-          files = files,
-          
-          output_dir = output_dir,
-          
-          threads = app_settings$threads,
-          
-          fastqc_path = app_settings$tools$fastqc
-          
-        )
-        
-        incProgress(1)
-        
-      }
-      
-    )
-    
-    showNotification(
-      "FastQC completed successfully!",
-      type = "message"
-    )
-    
-  })
+  quality_control_server(
+    input = input,
+    output = output,
+    session = session,
+    current_project = current_project,
+    project_samples = project_samples,
+    app_settings = app_settings
+  )
   
 }
 

@@ -25,9 +25,11 @@ run_fastqc <- function(
   # Monta comando
   args <- c(
     "--threads", as.character(threads),
-    "--outdir", normalizePath(output_dir, mustWork = FALSE),
-    normalizePath(files)
+    "--outdir", output_dir,
+    files
   )
+  
+  print(args)
   
   # Executa
   result <- system2(
