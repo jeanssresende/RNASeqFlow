@@ -36,7 +36,7 @@ server <- function(input, output, session) {
       selected_folder(),
       pattern = "\\.(fastq|fq)(\\.gz)?$",
       ignore.case = TRUE,
-      full.names = FALSE
+      full.names = TRUE
     )
     
   })
@@ -230,7 +230,7 @@ server <- function(input, output, session) {
       folder,
       pattern = "\\.(fastq|fq)(\\.gz)?$",
       ignore.case = TRUE,
-      full.names = FALSE
+      full.names = TRUE
     )
     
     samples <- parse_fastq_files(files)
@@ -239,7 +239,7 @@ server <- function(input, output, session) {
     
     project <- current_project()
     
-    project$path <- folder
+    project$fastq_folder <- folder
     project$samples <- samples
     
     if (is.null(project$name)) {
@@ -391,4 +391,92 @@ server <- function(input, output, session) {
     
   })
   
+  
+  # ==========================================================
+  # FastQC
+  # ==========================================================
+  
+  observeEvent(input$run_fastqc, {
+    
+    req(current_project()$path)
+    
+    if (is.null(current_project()$path)) {
+      
+      showNotification(
+        "Please create or open a project before running FastQC.",
+        type = "error"
+      )
+      
+      return()
+      
+    }
+    
+    req(current_project())
+    req(project_samples())
+    
+    if (is.null(app_settings$tools$fastqc)) {
+      
+      showNotification(
+        "FastQC was not found on this computer.",
+        type = "error"
+      )
+      
+      return()
+      
+    }
+    
+    print(current_project())
+    
+    print(current_project()$path)
+    
+    print(project_samples())
+    
+    output_dir <- file.path(
+      current_project()$path,
+      "results",
+      "fastqc"
+    )
+    
+    print(output_dir)
+    
+    samples <- project_samples()
+    
+    ## Ajuste os nomes das colunas conforme sua tabela
+    files <- unique(c(samples$R1, samples$R2))
+    
+    files <- files[!is.na(files)]
+    
+    withProgress(
+      
+      message = "Running FastQC...",
+      value = 0,
+      
+      {
+        
+        run_fastqc(
+          
+          files = files,
+          
+          output_dir = output_dir,
+          
+          threads = app_settings$threads,
+          
+          fastqc_path = app_settings$tools$fastqc
+          
+        )
+        
+        incProgress(1)
+        
+      }
+      
+    )
+    
+    showNotification(
+      "FastQC completed successfully!",
+      type = "message"
+    )
+    
+  })
+  
 }
+
