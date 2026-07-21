@@ -3,6 +3,7 @@ library(bslib)
 library(shinyWidgets)
 library(svDialogs)
 library(DT)
+library(curl)
 
 # Components
 source("R/components/action_card.R")
