@@ -11,6 +11,12 @@ quality_control_server <- function(
   # Quality control
   # ==========================================================
   
+  #-----------------------------------------------------------
+  # FastQC reports
+  #-----------------------------------------------------------
+  
+  fastqc_reports_state <- reactiveVal(data.frame())
+  
   observeEvent(input$run_quality_control, {
     
     req(current_project()$path)
@@ -29,15 +35,24 @@ quality_control_server <- function(
     req(current_project())
     req(project_samples())
     
-    if (is.null(app_settings$tools$fastqc)) {
+    fastqc_ok <- tryCatch({
+      
+      fastqc_binary()
+      TRUE
+      
+    }, error = function(e){
       
       showNotification(
-        "FastQC was not found on this computer.",
+        e$message,
         type = "error"
       )
       
-      return()
+      FALSE
       
+    })
+    
+    if (!fastqc_ok) {
+      return()
     }
     
     print(current_project())
@@ -46,44 +61,30 @@ quality_control_server <- function(
     
     print(project_samples())
     
-    output_dir <- file.path(
-      current_project()$path,
-      "results",
-      "fastqc"
-    )
-    
-    print(output_dir)
-    
     samples <- project_samples()
     
     ## Ajuste os nomes das colunas conforme sua tabela
-    files <- unique(c(samples$R1, samples$R2))
-    
-    files <- files[!is.na(files)]
+    files <- unique(na.omit(c(samples$R1, samples$R2)))
     
     withProgress(
-      
       message = "Running FastQC...",
       value = 0,
-      
       {
         
+        incProgress(0.1, detail = "Running FastQC...")
+        
         run_fastqc(
-          
           files = files,
-          
-          output_dir = output_dir,
-          
-          threads = app_settings$threads,
-          
-          fastqc_path = app_settings$tools$fastqc
-          
+          project = current_project(),
+          threads = app_settings$threads
+        )
+        
+        fastqc_reports_state(
+          fastqc_report_table(current_project())
         )
         
         incProgress(1)
-        
       }
-      
     )
     
     showNotification(
@@ -161,6 +162,45 @@ quality_control_server <- function(
       
       p(strong("Threads:"), settings$threads)
     )
+    
+  })
+  
+  output$fastqc_reports <- DT::renderDataTable({
+    
+    reports <- fastqc_reports_state()
+    
+    if (nrow(reports) == 0)
+      return(NULL)
+    
+    DT::datatable(
+      
+      reports[, c("Sample", "File", "Status")],
+      
+      escape = FALSE,
+      
+      selection = "single",
+      
+      rownames = FALSE,
+      
+      options = list(
+        dom = "t",
+        pageLength = 10,
+        ordering = FALSE
+      )
+      
+    )
+    
+  })
+  
+  observeEvent(input$fastqc_reports_rows_selected, {
+    
+    row <- input$fastqc_reports_rows_selected
+    
+    req(length(row) == 1)
+    
+    reports <- fastqc_reports_state()
+    
+    browseURL(reports$Path[row])
     
   })
 

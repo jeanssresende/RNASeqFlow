@@ -41,6 +41,14 @@ quality_control_page_ui <- function() {
     br(),
     br(),
     
+    hr(),
+    
+    h3("FastQC Reports"),
+    
+    DT::dataTableOutput("fastqc_reports"),
+    
+    br(),
+    
     uiOutput("qc_status")
     
   )

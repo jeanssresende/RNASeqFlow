@@ -8,32 +8,30 @@
 
 default_project <- function() {
   
-  list(
+  results = list(
     
-    name = NULL,
+    fastqc = list(
+      completed = FALSE,
+      date = NULL,
+      reports = character()
+    ),
     
-    path = NULL,
+    multiqc = list(
+      completed = FALSE,
+      date = NULL,
+      reports = character()
+    ),
     
-    version = "0.1.0",
+    trimming = list(
+      completed = FALSE
+    ),
     
-    created = Sys.time(),
+    quantification = list(
+      completed = FALSE
+    ),
     
-    samples = NULL,
-    
-    settings = list(),
-    
-    results = list(
-      
-      fastqc = NULL,
-      
-      multiqc = NULL,
-      
-      trimming = NULL,
-      
-      quantification = NULL,
-      
-      annotation = NULL
-      
+    annotation = list(
+      completed = FALSE
     )
     
   )
