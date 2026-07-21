@@ -2,25 +2,10 @@
 # RNASeqFlow Settings
 # ==========================================================
 
-settings_directory <- function() {
-  
-  if (.Platform$OS.type == "windows") {
-    
-    file.path(Sys.getenv("APPDATA"), "RNASeqFlow")
-    
-  } else {
-    
-    file.path(path.expand("~"), ".RNASeqFlow")
-    
-  }
-  
-}
-
-
 settings_file <- function() {
   
   file.path(
-    settings_directory(),
+    config_directory(),
     "settings.rds"
   )
   
@@ -35,11 +20,25 @@ default_settings <- function() {
     
     threads = parallel::detectCores(),
     
+    conda = list(
+      
+      installed = FALSE,
+      
+      version = NULL,
+      
+      environment = RNASEQFLOW_ENV
+      
+    ),
+    
     tools = list(
       
       fastqc = NULL,
       
-      multiqc = NULL
+      multiqc = NULL,
+      
+      fastp = NULL,
+      
+      salmon = NULL
       
     )
     
@@ -51,7 +50,7 @@ default_settings <- function() {
 load_settings <- function() {
   
   dir.create(
-    settings_directory(),
+    config_directory(),
     recursive = TRUE,
     showWarnings = FALSE
   )
@@ -76,7 +75,7 @@ load_settings <- function() {
 save_settings <- function(settings) {
   
   dir.create(
-    settings_directory(),
+    config_directory(),
     recursive = TRUE,
     showWarnings = FALSE
   )
