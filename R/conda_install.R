@@ -205,8 +205,120 @@ conda_binary <- function() {
 
 miniconda_installed <- function() {
   
-  file.exists(
-    conda_binary()
+  !is.null(
+    conda_version()
   )
+  
+}
+
+# ==========================================================
+# Install Miniconda
+# ==========================================================
+
+install_miniconda <- function(progress = NULL) {
+  
+  if (miniconda_installed()) {
+    
+    report_progress(
+      progress,
+      value = 1,
+      message = "Miniconda already installed."
+    )
+    
+    return(TRUE)
+    
+  }
+  
+  installer <- download_miniconda(progress = progress)
+  
+  report_progress(
+    progress,
+    value = 0.5,
+    message = "Installing Miniconda..."
+  )
+  
+  info <- platform_info()
+  
+  if (info$os == "Linux") {
+    
+    run_command_or_stop(
+      
+      command = "bash",
+      
+      args = c(
+        installer,
+        "-b",
+        "-p",
+        miniconda_directory()
+      )
+      
+    )
+    
+  } else if (info$os == "Windows") {
+    
+    run_command_or_stop(
+      
+      command = installer,
+      
+      args = c(
+        "/InstallationType=JustMe",
+        "/RegisterPython=0",
+        "/S",
+        paste0(
+          "/D=",
+          normalizePath(
+            miniconda_directory(),
+            winslash = "\\",
+            mustWork = FALSE
+          )
+        )
+      )
+      
+    )
+    
+  } else {
+    
+    stop("Unsupported operating system.")
+    
+  }
+  
+  report_progress(
+    progress,
+    value = 1,
+    message = "Miniconda installed successfully."
+  )
+  
+  TRUE
+  
+}
+
+
+# ==========================================================
+# Conda Version
+# ==========================================================
+
+conda_version <- function() {
+  
+  if (!file.exists(conda_binary())) {
+    
+    return(NULL)
+    
+  }
+  
+  result <- run_command(
+    
+    command = conda_binary(),
+    
+    args = "--version"
+    
+  )
+  
+  if (!result$success) {
+    
+    return(NULL)
+    
+  }
+  
+  trimws(result$output)
   
 }

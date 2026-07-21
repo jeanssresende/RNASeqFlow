@@ -58,3 +58,21 @@ run_command <- function(command,
   )
   
 }
+
+
+run_command_or_stop <- function(...) {
+  
+  result <- run_command(...)
+  
+  if (!result$success) {
+    
+    stop(
+      paste(result$output, collapse = "\n"),
+      call. = FALSE
+    )
+    
+  }
+  
+  result
+  
+}
