@@ -61,8 +61,15 @@ quality_control_page_ui <- function() {
     actionButton(
       "run_multiqc",
       "Run MultiQC",
-      class = "btn-secondary"
+      class = "btn-primary"
     ),
+    
+    br(),
+    br(),
+    
+    uiOutput("multiqc_summary_card"),
+    
+    br(),
     
     br(),
     

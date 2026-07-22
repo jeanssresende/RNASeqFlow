@@ -98,6 +98,54 @@ quality_control_server <- function(
     )
     
   })  
+  
+  
+  observeEvent(input$run_multiqc, {
+    
+    req(current_project())
+    
+    # Verifica se existem resultados do FastQC
+    fastqc_dir <- fastqc_output_directory(current_project())
+    
+    if (!dir.exists(fastqc_dir)) {
+      
+      showNotification(
+        "Run FastQC before running MultiQC.",
+        type = "error"
+      )
+      
+      return()
+      
+    }
+    
+    withProgress(
+      message = "Running MultiQC...",
+      value = 0,
+      {
+        
+        incProgress(0.1)
+        
+        run_multiqc(
+          project = current_project()
+        )
+        
+        # Atualiza o projeto reativo
+        current_project(
+          load_project(current_project()$path)
+        )
+        
+        incProgress(1)
+        
+      }
+      
+    )
+    
+    showNotification(
+      "MultiQC completed successfully!",
+      type = "message"
+    )
+    
+  })
 
 
   output$qc_project_summary <- renderUI({
@@ -278,6 +326,75 @@ quality_control_server <- function(
       }
       
     )
+    
+  })
+  
+  output$multiqc_summary_card <- renderUI({
+    
+    req(current_project())
+    
+    summary <- multiqc_summary(current_project())
+    
+    div(
+      style = "
+      border:1px solid #dee2e6;
+      border-radius:8px;
+      padding:15px;
+      background:#f8f9fa;
+      margin-bottom:15px;
+    ",
+      
+      h4("MultiQC"),
+      
+      p(
+        strong("Status: "),
+        if (summary$completed) {
+          span(style = "color:#198754;", "Completed")
+        } else {
+          span(style = "color:#6c757d;", "Not executed")
+        }
+      ),
+      
+      if (summary$completed) {
+        
+        tagList(
+          
+          p(
+            strong("Report: "),
+            basename(summary$report)
+          ),
+          
+          p(
+            strong("Last execution: "),
+            format(summary$date, "%d/%m/%Y %H:%M")
+          ),
+          
+          br(),
+          
+          actionButton(
+            "open_multiqc_report",
+            "Open Report",
+            icon = icon("external-link-alt"),
+            class = "btn-success btn-sm"
+          )
+          
+        )
+        
+      }
+      
+    )
+    
+  })
+  
+  observeEvent(input$open_multiqc_report, {
+    
+    summary <- multiqc_summary(current_project())
+    
+    req(summary$completed)
+    req(!is.null(summary$report))
+    req(file.exists(summary$report))
+    
+    browseURL(summary$report)
     
   })
 

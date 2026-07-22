@@ -63,3 +63,12 @@ fastqc_version <- function() {
   
 }
 
+#-----------------------------------------------------------
+# MultiQC Binary
+#-----------------------------------------------------------
+
+multiqc_binary <- function() {
+  
+  tool_binary("multiqc")
+  
+}

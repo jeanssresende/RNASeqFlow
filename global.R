@@ -29,6 +29,7 @@ source("R/fastq_parser.R")
 source("R/project_summary.R")
 source("R/project_create.R")
 source("R/project_open.R")
+source("R/quality_control/multiqc.R")
 
 
 # Primeiro carrega todos os arquivos

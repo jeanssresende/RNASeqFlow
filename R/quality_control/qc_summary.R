@@ -33,3 +33,36 @@ fastqc_summary <- function(project) {
   )
   
 }
+
+
+#-----------------------------------------------------------
+# MultiQC summary
+#-----------------------------------------------------------
+
+multiqc_summary <- function(project) {
+  
+  if (is.null(project)) {
+    return(NULL)
+  }
+  
+  result <- project$results$multiqc
+  
+  if (is.null(result) || !isTRUE(result$completed)) {
+    
+    return(list(
+      completed = FALSE,
+      report = NULL,
+      date = NULL,
+      status = "Not executed"
+    ))
+    
+  }
+  
+  list(
+    completed = TRUE,
+    report = result$report,
+    date = result$date,
+    status = "Completed"
+  )
+  
+}
