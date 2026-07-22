@@ -6,13 +6,18 @@
 # FastQC summary
 #-----------------------------------------------------------
 
-fastqc_summary <- function(project) {
+# ==========================================================
+# FastQC summary
+# ==========================================================
+
+fastqc_summary <- function(project,
+                           stage = "raw") {
   
   if (is.null(project)) {
     return(NULL)
   }
   
-  result <- project$results$fastqc
+  result <- project$results[[paste0("fastqc_", stage)]]
   
   if (is.null(result) || !isTRUE(result$completed)) {
     
@@ -39,13 +44,14 @@ fastqc_summary <- function(project) {
 # MultiQC summary
 #-----------------------------------------------------------
 
-multiqc_summary <- function(project) {
+multiqc_summary <- function(project,
+                            stage = "raw") {
   
   if (is.null(project)) {
     return(NULL)
   }
   
-  result <- project$results$multiqc
+  result <- project$results[[paste0("multiqc_", stage)]]
   
   if (is.null(result) || !isTRUE(result$completed)) {
     

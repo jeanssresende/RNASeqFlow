@@ -15,6 +15,7 @@ server <- function(input, output, session) {
       status = list(
         fastqc = FALSE,
         trimming = FALSE,
+        fastqc_trimmed = FALSE,
         quantification = FALSE
       )
     )
@@ -411,6 +412,7 @@ server <- function(input, output, session) {
   observeEvent(input$go_import, current_page("import"))
   observeEvent(input$go_qc, current_page("qc"))
   observeEvent(input$go_trimming, current_page("trimming"))
+  observeEvent(input$go_trimmed_qc, current_page("trimmed_qc"))
   observeEvent(input$go_quantification, current_page("quantification"))
   observeEvent(input$go_annotation, current_page("annotation"))
   observeEvent(input$go_export, current_page("export"))
@@ -432,6 +434,7 @@ server <- function(input, output, session) {
       import         = import_samples_page_ui(),
       qc             = quality_control_page_ui(),
       trimming       = trimming_page_ui(),
+      trimmed_qc     = trimmed_qc_page_ui(),
       quantification = quantification_page_ui(),
       annotation     = annotation_page_ui(),
       export         = export_page_ui(),
@@ -457,6 +460,15 @@ server <- function(input, output, session) {
     current_project,
     project_samples,
     app_settings
+  )
+  
+  trimmed_qc_server(
+    input = input,
+    output = output,
+    session = session,
+    current_project = current_project,
+    project_samples = project_samples,
+    app_settings = app_settings
   )
   
 }

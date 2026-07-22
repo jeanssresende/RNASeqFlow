@@ -1,4 +1,4 @@
-quality_control_server <- function(
+trimmed_qc_server <- function(
     input,
     output,
     session,
@@ -8,16 +8,16 @@ quality_control_server <- function(
 ){
   
   # ==========================================================
-  # Quality control
+  # Trimmed Quality Control
   # ==========================================================
   
   #-----------------------------------------------------------
   # FastQC reports
   #-----------------------------------------------------------
   
-  fastqc_reports_state <- reactiveVal(data.frame())
+  fastqc_trimmed_reports_state <- reactiveVal(data.frame())
   
-  observeEvent(input$run_fastqc, {
+  observeEvent(input$run_fastqc_trimmed, {
     
     req(current_project()$path)
     
@@ -56,14 +56,14 @@ quality_control_server <- function(
     }
     
     print(current_project())
-    
     print(current_project()$path)
-    
     print(project_samples())
     
     samples <- project_samples()
     
-    ## Ajuste os nomes das colunas conforme sua tabela
+    ## TEMPORÁRIO:
+    ## Na próxima etapa vamos trocar estes arquivos pelos FASTQs
+    ## produzidos pelo fastp.
     files <- unique(na.omit(c(samples$R1, samples$R2)))
     
     withProgress(
@@ -76,19 +76,23 @@ quality_control_server <- function(
         run_fastqc(
           files = files,
           project = current_project(),
-          threads = app_settings$threads
+          threads = app_settings$threads,
+          stage = "trimmed"
         )
         
-        # Recarrega o projeto atualizado
         current_project(
           load_project(current_project()$path)
         )
         
-        fastqc_reports_state(
-          fastqc_report_table(current_project())
+        fastqc_trimmed_reports_state(
+          fastqc_report_table(
+            current_project(),
+            stage = "trimmed"
+          )
         )
         
         incProgress(1)
+        
       }
     )
     
@@ -97,14 +101,17 @@ quality_control_server <- function(
       type = "message"
     )
     
-  })  
+  })
   
   
-  observeEvent(input$run_multiqc, {
+  #-----------------------------------------------------------
+  # MultiQC
+  #-----------------------------------------------------------
+  
+  observeEvent(input$run_multiqc_trimmed, {
     
     req(current_project())
     
-    # Verifica se existem resultados do FastQC
     fastqc_dir <- fastqc_output_directory(current_project())
     
     if (!dir.exists(fastqc_dir)) {
@@ -126,10 +133,10 @@ quality_control_server <- function(
         incProgress(0.1)
         
         run_multiqc(
-          project = current_project()
+          project = current_project(),
+          stage = "trimmed"
         )
         
-        # Atualiza o projeto reativo
         current_project(
           load_project(current_project()$path)
         )
@@ -137,7 +144,6 @@ quality_control_server <- function(
         incProgress(1)
         
       }
-      
     )
     
     showNotification(
@@ -146,16 +152,18 @@ quality_control_server <- function(
     )
     
   })
-
-
-  output$qc_project_summary <- renderUI({
+  
+  
+  #-----------------------------------------------------------
+  # Project summary
+  #-----------------------------------------------------------
+  
+  output$trimmed_qc_project_summary <- renderUI({
     
     req(current_project())
     
-    summary <- fastqc_summary(
-      current_project(),
-      stage = "raw"
-    )
+    summary <- fastqc_summary(current_project(),
+                              stage = "trimmed")
     
     samples <- project_samples()
     
@@ -203,11 +211,17 @@ quality_control_server <- function(
         )
         
       }
+      
     )
     
   })
-
-  output$qc_tools_summary <- renderUI({
+  
+  
+  #-----------------------------------------------------------
+  # Installed tools
+  #-----------------------------------------------------------
+  
+  output$trimmed_qc_tools_summary <- renderUI({
     
     settings <- app_settings
     
@@ -239,14 +253,22 @@ quality_control_server <- function(
       
       p(if (multiqc_ok) "🟢 MultiQC" else "🔴 MultiQC"),
       
-      p(strong("Threads:"), settings$threads)
+      p(
+        strong("Threads: "),
+        settings$threads
+      )
+      
     )
     
   })
   
-  output$fastqc_reports <- DT::renderDataTable({
+  #-----------------------------------------------------------
+  # FastQC reports table
+  #-----------------------------------------------------------
+  
+  output$fastqc_trimmed_reports <- DT::renderDataTable({
     
-    reports <- fastqc_reports_state()
+    reports <- fastqc_trimmed_reports_state()
     
     if (nrow(reports) == 0)
       return(NULL)
@@ -275,27 +297,30 @@ quality_control_server <- function(
     
   })
   
-  observeEvent(input$fastqc_reports_rows_selected, {
+  
+  observeEvent(input$fastqc_trimmed_reports_rows_selected, {
     
-    row <- input$fastqc_reports_rows_selected
+    row <- input$fastqc_trimmed_reports_rows_selected
     
     req(length(row) == 1)
     
-    reports <- fastqc_reports_state()
+    reports <- fastqc_trimmed_reports_state()
     
     browseURL(reports$Path[row])
     
   })
   
   
-  output$fastqc_summary_card <- renderUI({
+  #-----------------------------------------------------------
+  # FastQC summary
+  #-----------------------------------------------------------
+  
+  output$fastqc_trimmed_summary_card <- renderUI({
     
     req(current_project())
     
-    summary <- fastqc_summary(
-      current_project(),
-      stage = "raw"
-    )
+    summary <- fastqc_summary(current_project(),
+                              stage = "trimmed")
     
     div(
       style = "
@@ -311,9 +336,9 @@ quality_control_server <- function(
       p(
         strong("Status: "),
         if (summary$completed) {
-          span(style = "color: #198754;", "Completed")
+          span(style = "color:#198754;", "Completed")
         } else {
-          span(style = "color: #6c757d;", "Not executed")
+          span(style = "color:#6c757d;", "Not executed")
         }
       ),
       
@@ -335,11 +360,17 @@ quality_control_server <- function(
     
   })
   
-  output$multiqc_summary_card <- renderUI({
+  
+  #-----------------------------------------------------------
+  # MultiQC summary
+  #-----------------------------------------------------------
+  
+  output$multiqc_trimmed_summary_card <- renderUI({
     
     req(current_project())
     
-    summary <- multiqc_summary(current_project())
+    summary <- multiqc_summary(current_project(),
+                               stage = "trimmed")
     
     div(
       style = "
@@ -378,7 +409,7 @@ quality_control_server <- function(
           br(),
           
           actionButton(
-            "open_multiqc_report",
+            "open_multiqc_trimmed_report",
             "Open Report",
             icon = icon("external-link-alt"),
             class = "btn-success btn-sm"
@@ -392,9 +423,15 @@ quality_control_server <- function(
     
   })
   
-  observeEvent(input$open_multiqc_report, {
+  
+  #-----------------------------------------------------------
+  # Open MultiQC report
+  #-----------------------------------------------------------
+  
+  observeEvent(input$open_multiqc_trimmed_report, {
     
-    summary <- multiqc_summary(current_project())
+    summary <- multiqc_summary(current_project(),
+                               stage = "trimmed")
     
     req(summary$completed)
     req(!is.null(summary$report))
@@ -403,5 +440,5 @@ quality_control_server <- function(
     browseURL(summary$report)
     
   })
-
+  
 }

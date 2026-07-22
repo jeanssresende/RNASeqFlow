@@ -26,6 +26,8 @@ sidebar_ui <- function() {
     
     menu_item("go_trimming", "scissors", "Trimming"),
     
+    menu_item("go_trimmed_qc", "clipboard-check", "Trimmed QC"),
+    
     menu_item("go_quantification", "chart-bar", "Quantification"),
     
     menu_item("go_annotation", "file-alt", "Annotation"),

@@ -2,42 +2,67 @@
 # MultiQC
 # ==========================================================
 
-#-----------------------------------------------------------
-# Output directory
-#-----------------------------------------------------------
+# ==========================================================
+# MultiQC Output Directory
+# ==========================================================
 
-multiqc_output_directory <- function(project) {
+multiqc_output_directory <- function(project,
+                                     stage = "raw") {
+  
+  folder <- switch(
+    
+    stage,
+    
+    raw = file.path("qc", "multiqc"),
+    
+    trimmed = file.path("qc_trimmed", "multiqc"),
+    
+    stop("Invalid MultiQC stage.")
+    
+  )
   
   file.path(
     project$path,
     "results",
-    "multiqc"
+    folder
   )
   
 }
 
-#-----------------------------------------------------------
-# Input directory
-#-----------------------------------------------------------
+# ==========================================================
+# MultiQC Input Directory
+# ==========================================================
 
-multiqc_input_directory <- function(project) {
+multiqc_input_directory <- function(project,
+                                    stage = "raw") {
   
-  fastqc_output_directory(project)
+  fastqc_output_directory(
+    project,
+    stage = stage
+  )
   
 }
 
-#-----------------------------------------------------------
-# Command
-#-----------------------------------------------------------
+# ==========================================================
+# MultiQC Command
+# ==========================================================
 
-multiqc_command <- function(project) {
+multiqc_command <- function(project,
+                            stage = "raw") {
   
   c(
     
-    multiqc_input_directory(project),
+    multiqc_input_directory(
+      project,
+      stage = stage
+    ),
     
     "--outdir",
-    multiqc_output_directory(project),
+    
+    multiqc_output_directory(
+      project,
+      stage = stage
+    ),
     
     "--force"
     
@@ -45,24 +70,26 @@ multiqc_command <- function(project) {
   
 }
 
-#-----------------------------------------------------------
-# Report
-#-----------------------------------------------------------
+# ==========================================================
+# MultiQC Report
+# ==========================================================
 
-multiqc_report <- function(project) {
+multiqc_report <- function(project,
+                           stage = "raw") {
   
   report <- file.path(
     
-    multiqc_output_directory(project),
+    multiqc_output_directory(
+      project,
+      stage = stage
+    ),
     
     "multiqc_report.html"
     
   )
   
   if (!file.exists(report)) {
-    
     return(NULL)
-    
   }
   
   normalizePath(
@@ -74,9 +101,13 @@ multiqc_report <- function(project) {
 }
 
 run_multiqc <- function(project,
-                        progress = NULL) {
+                        progress = NULL,
+                        stage = "raw") {
   
-  output_directory <- multiqc_output_directory(project)
+  output_directory <- multiqc_output_directory(
+    project,
+    stage = stage
+  )
   
   dir.create(
     output_directory,
@@ -97,17 +128,23 @@ run_multiqc <- function(project,
     
     command = multiqc_binary(),
     
-    args = multiqc_command(project)
+    args = multiqc_command(
+      project,
+      stage = stage
+    )
     
   )
   
-  project$results$multiqc <- list(
+  project$results[[paste0("multiqc_", stage)]] <- list(
     
     completed = TRUE,
     
     date = Sys.time(),
     
-    report = multiqc_report(project)
+    report = multiqc_report(
+      project,
+      stage = stage
+    )
     
   )
   

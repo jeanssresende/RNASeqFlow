@@ -2,12 +2,25 @@
 # FastQC Output Directory
 # ==========================================================
 
-fastqc_output_directory <- function(project) {
+fastqc_output_directory <- function(project,
+                                    stage = "raw") {
+  
+  folder <- switch(
+    
+    stage,
+    
+    raw = file.path("qc", "fastqc"),
+    
+    trimmed = file.path("qc_trimmed", "fastqc"),
+    
+    stop("Invalid FastQC stage.")
+    
+  )
   
   file.path(
     project$path,
     "results",
-    "fastqc"
+    folder
   )
   
 }
@@ -35,9 +48,13 @@ fastqc_command <- function(files,
 run_fastqc <- function(files,
                        project,
                        threads = 1,
-                       progress = NULL) {
+                       progress = NULL,
+                       stage = "raw") {
   
-  output_directory <- fastqc_output_directory(project)
+  output_directory <- fastqc_output_directory(
+    project,
+    stage = stage
+  )
   
   # Cria o diretório apenas quando necessário
   dir.create(
@@ -65,13 +82,16 @@ run_fastqc <- function(files,
     
   )
   
-  project$results$fastqc <- list(
+  project$results[[paste0("fastqc_", stage)]] <- list(
     
     completed = TRUE,
     
     date = Sys.time(),
     
-    reports = fastqc_reports(project)
+    reports = fastqc_reports(
+      project,
+      stage = stage
+    )
     
   )
   
@@ -84,6 +104,19 @@ run_fastqc <- function(files,
     )
   }
   
+  project$results[[paste0("fastqc_", stage)]] <- list(
+    
+    completed = TRUE,
+    
+    date = Sys.time(),
+    
+    reports = fastqc_reports(
+      project,
+      stage = stage
+    )
+    
+  )
+  
   return(result)
   
 }
@@ -91,7 +124,8 @@ run_fastqc <- function(files,
 # FastQC Reports
 # ==========================================================
 
-fastqc_reports <- function(project) {
+fastqc_reports <- function(project,
+                           stage = "raw") {
   
   if (is.null(project))
     return(character())
@@ -99,7 +133,10 @@ fastqc_reports <- function(project) {
   if (is.null(project$path))
     return(character())
   
-  output_directory <- fastqc_output_directory(project)
+  output_directory <- fastqc_output_directory(
+    project,
+    stage = stage
+  )
   
   if (!dir.exists(output_directory))
     return(character())
@@ -116,13 +153,13 @@ fastqc_reports <- function(project) {
 # FastQC Report Table
 #-----------------------------------------------------------
 
-#-----------------------------------------------------------
-# FastQC Report Table
-#-----------------------------------------------------------
-
-fastqc_report_table <- function(project) {
+fastqc_report_table <- function(project,
+                                stage = "raw") {
   
-  reports <- fastqc_reports(project)
+  reports <- fastqc_reports(
+    project,
+    stage = stage
+  )
   
   if (length(reports) == 0)
     return(data.frame())
