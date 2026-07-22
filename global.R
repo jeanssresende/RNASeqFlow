@@ -34,6 +34,17 @@ source("R/project_create.R")
 source("R/project_open.R")
 source("R/quality_control/multiqc.R")
 
+# ==========================================================
+# Quantification
+# ==========================================================
+
+source("R/quantification/reference.R")
+source("R/quantification/reference_summary.R")
+source("R/quantification/salmon.R")
+source("R/quantification/salmon_summary.R")
+source("R/quantification/quantification_page.R")
+source("R/quantification/quantification_server.R")
+
 
 # Primeiro carrega todos os arquivos
 source_files <- list.files(

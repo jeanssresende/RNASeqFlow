@@ -471,6 +471,13 @@ server <- function(input, output, session) {
     app_settings = app_settings
   )
   
+  quantification_server(
+    input,
+    output,
+    session,
+    current_project
+  )
+  
 }
 
 
