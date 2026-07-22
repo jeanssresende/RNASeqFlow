@@ -1,16 +1,21 @@
 parse_fastq_files <- function(files) {
   
-  if (length(files) == 0) {
+  if (length(files) == 0)
     return(data.frame())
-  }
   
-  samples <- sub("([._-]R?[12]).*$", "", files)
+  filenames <- basename(files)
+  
+  samples <- sub(
+    "([._-]R?[12]).*$",
+    "",
+    filenames
+  )
   
   reads <- ifelse(
-    grepl("R1|_1|\\.1", files, ignore.case = TRUE),
+    grepl("R1|_1|\\.1", filenames, ignore.case = TRUE),
     "R1",
     ifelse(
-      grepl("R2|_2|\\.2", files, ignore.case = TRUE),
+      grepl("R2|_2|\\.2", filenames, ignore.case = TRUE),
       "R2",
       NA
     )

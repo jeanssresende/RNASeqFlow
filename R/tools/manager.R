@@ -72,3 +72,13 @@ multiqc_binary <- function() {
   tool_binary("multiqc")
   
 }
+
+#-----------------------------------------------------------
+# fastp Binary
+#-----------------------------------------------------------
+
+fastp_binary <- function() {
+  
+  tool_binary("fastp")
+  
+}

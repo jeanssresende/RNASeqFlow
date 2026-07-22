@@ -450,6 +450,15 @@ server <- function(input, output, session) {
     app_settings = app_settings
   )
   
+  trimming_server(
+    input,
+    output,
+    session,
+    current_project,
+    project_samples,
+    app_settings
+  )
+  
 }
 
 
