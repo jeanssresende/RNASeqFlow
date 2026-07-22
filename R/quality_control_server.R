@@ -17,7 +17,7 @@ quality_control_server <- function(
   
   fastqc_reports_state <- reactiveVal(data.frame())
   
-  observeEvent(input$run_quality_control, {
+  observeEvent(input$run_fastqc, {
     
     req(current_project()$path)
     
@@ -79,6 +79,11 @@ quality_control_server <- function(
           threads = app_settings$threads
         )
         
+        # Recarrega o projeto atualizado
+        current_project(
+          load_project(current_project()$path)
+        )
+        
         fastqc_reports_state(
           fastqc_report_table(current_project())
         )
@@ -98,6 +103,8 @@ quality_control_server <- function(
   output$qc_project_summary <- renderUI({
     
     req(current_project())
+    
+    summary <- fastqc_summary(current_project())
     
     samples <- project_samples()
     
@@ -123,7 +130,28 @@ quality_control_server <- function(
       
       p(strong("FASTQ Files:"), n_fastq),
       
-      p(strong("Output:"), "results/")
+      hr(),
+      
+      h4("FastQC"),
+      
+      p(
+        strong("Status: "),
+        summary$status
+      ),
+      
+      p(
+        strong("Reports: "),
+        summary$reports
+      ),
+      
+      if (summary$completed) {
+        
+        p(
+          strong("Last execution: "),
+          format(summary$date, "%d/%m/%Y %H:%M")
+        )
+        
+      }
     )
     
   })
@@ -132,8 +160,8 @@ quality_control_server <- function(
     
     settings <- app_settings
     
-    fastqc_path <- settings$tools$fastqc
-    multiqc_path <- settings$tools$multiqc
+    fastqc_path <- fastqc_binary()
+    multiqc_path <- tool_binary("multiqc")
     
     fastqc_ok <- !is.null(fastqc_path) &&
       nzchar(fastqc_path) &&
@@ -174,7 +202,11 @@ quality_control_server <- function(
     
     DT::datatable(
       
-      reports[, c("Sample", "File", "Status")],
+      reports[, c(
+        "Sample",
+        "Report",
+        "Status"
+      )],
       
       escape = FALSE,
       
@@ -201,6 +233,51 @@ quality_control_server <- function(
     reports <- fastqc_reports_state()
     
     browseURL(reports$Path[row])
+    
+  })
+  
+  
+  output$fastqc_summary_card <- renderUI({
+    
+    req(current_project())
+    
+    summary <- fastqc_summary(current_project())
+    
+    div(
+      style = "
+      border:1px solid #dee2e6;
+      border-radius:8px;
+      padding:15px;
+      background:#f8f9fa;
+      margin-bottom:15px;
+    ",
+      
+      h4("FastQC"),
+      
+      p(
+        strong("Status: "),
+        if (summary$completed) {
+          span(style = "color: #198754;", "Completed")
+        } else {
+          span(style = "color: #6c757d;", "Not executed")
+        }
+      ),
+      
+      p(
+        strong("Reports: "),
+        summary$reports
+      ),
+      
+      if (summary$completed) {
+        
+        p(
+          strong("Last execution: "),
+          format(summary$date, "%d/%m/%Y %H:%M")
+        )
+        
+      }
+      
+    )
     
   })
 

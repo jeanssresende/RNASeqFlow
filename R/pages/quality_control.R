@@ -32,24 +32,41 @@ quality_control_page_ui <- function() {
     
     br(),
     
+    h3("FastQC"),
+    
     actionButton(
-      "run_quality_control",
-      "Run Quality Control",
-      class = "btn-primary btn-lg"
+      "run_fastqc",
+      "Run FastQC",
+      class = "btn-primary"
     ),
     
     br(),
     br(),
     
-    hr(),
+    uiOutput("fastqc_summary_card"),
+    
+    br(),
+    
+    br(),
+    br(),
     
     h3("FastQC Reports"),
     
     DT::dataTableOutput("fastqc_reports"),
     
+    hr(),
+    
+    h3("MultiQC"),
+    
+    actionButton(
+      "run_multiqc",
+      "Run MultiQC",
+      class = "btn-secondary"
+    ),
+    
     br(),
     
-    uiOutput("qc_status")
+    uiOutput("multiqc_status")
     
   )
   

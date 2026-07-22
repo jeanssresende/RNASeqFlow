@@ -124,17 +124,20 @@ fastqc_report_table <- function(project) {
   
   reports <- fastqc_reports(project)
   
-  if (length(reports) == 0) {
+  if (length(reports) == 0)
     return(data.frame())
-  }
   
   data.frame(
     
-    Sample = sub("_fastqc\\.html$", "", basename(reports)),
+    Sample = sub(
+      "_fastqc\\.html$",
+      "",
+      basename(reports)
+    ),
     
-    File = basename(reports),
+    Report = "HTML Report",
     
-    Status = "✅",
+    Status = "🟢 Completed",
     
     Path = normalizePath(
       reports,

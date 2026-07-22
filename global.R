@@ -43,4 +43,3 @@ invisible(lapply(source_files, source))
 
 # Só depois usa as funções
 app_settings <- load_settings()
-app_settings <- detect_tools(app_settings)
