@@ -191,3 +191,40 @@ run_fastp <- function(
   invisible(project)
   
 }
+
+#-----------------------------------------------------------
+# Reports table
+#-----------------------------------------------------------
+
+fastp_report_table <- function(project){
+  
+  result <- project$results$fastp
+  
+  if (is.null(result)) {
+    
+    return(
+      data.frame(
+        Sample = character(),
+        Status = character(),
+        stringsAsFactors = FALSE
+      )
+    )
+    
+  }
+  
+  data.frame(
+    
+    Sample = sapply(
+      result$reports,
+      function(x)
+        sub("_fastp\\.html$", "", basename(x$html))
+    ),
+    
+    Status = "Completed",
+    
+    stringsAsFactors = FALSE
+    
+  )
+  
+}
+

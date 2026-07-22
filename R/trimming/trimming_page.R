@@ -43,6 +43,14 @@ trimming_page_ui <- function() {
           class = "btn-primary"
         ),
         
+        actionButton(
+          "open_fastp_report",
+          "Open Report",
+          icon = icon("file-lines"),
+          class = "btn-secondary"
+          
+        ),
+        
         br(),
         br(),
         
